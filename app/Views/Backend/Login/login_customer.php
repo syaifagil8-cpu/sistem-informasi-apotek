@@ -48,7 +48,8 @@
                     </form>
                 </div>
                 <div class="panel-footer card-footer text-center text-muted">
-                    <small>&copy; 2026 SI Apotek Berbasis Web</small>
+                    Belum punya akun? <a href="<?= base_url('customer/register') ?>">Daftar di sini</a>
+                    <br><small>&copy; 2026 SI Apotek Berbasis Web</small>
                 </div>
             </div>
         </div>
