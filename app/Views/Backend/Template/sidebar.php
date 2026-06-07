@@ -50,7 +50,7 @@
         <li role="presentation" class="divider"></li>
         
         <!-- Logout -->
-        <li><a href="<?= base_url('logout'); ?>"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+        <li><a href="<?= base_url('customer/logout'); ?>"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
     </ul>
     <div class="attribution">Template by <a href="http://www.medialoot.com/">Medialoot</a></div>
 </div><!--/.sidebar-->
