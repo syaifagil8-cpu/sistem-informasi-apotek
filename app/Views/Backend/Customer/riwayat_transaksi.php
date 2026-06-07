@@ -47,9 +47,8 @@
                             Detail
                             </a>
                             <?php if($t['status'] == 'Belum Lunas'): ?>
-                            <a href="<?= base_url('customer/bayar/'.$t['id_penjualan']) ?>"
-                            class="btn btn-success btn-sm"
-                            onclick="return confirm('Yakin ingin melakukan pembayaran?')">
+                            <a href="#" class="btn btn-success btn-sm"
+                            onclick="konfirmasiBayar('<?= base_url('customer/bayar/'.$t['id_penjualan']) ?>')">
                             Bayar
                             </a>
                             <?php endif; ?>
@@ -71,4 +70,22 @@
 
 </div>
 
+<script>
+function konfirmasiBayar(url) {
+    Swal.fire({
+        title: 'Konfirmasi Pembayaran',
+        text: 'Yakin ingin melakukan pembayaran?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Bayar!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+</script>
 <?= $this->include('Backend/Template/footer') ?>

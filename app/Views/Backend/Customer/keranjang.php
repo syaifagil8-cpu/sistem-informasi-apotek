@@ -42,10 +42,9 @@
                         <td><?= $item['qty'] ?></td>
                         <td>Rp <?= number_format($item['subtotal'], 0, ',', '.') ?></td>
                         <td>
-                            <a href="<?= base_url('customer/hapus-keranjang/'.$item['id_obat']) ?>" 
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Hapus item ini?')">
-                               Hapus
+                            <a href="#" class="btn btn-danger btn-sm"
+                            onclick="konfirmasiHapus('<?= base_url('customer/hapus-keranjang/'.$item['id_obat']) ?>')">
+                            Hapus
                             </a>
                         </td>
                     </tr>
@@ -61,10 +60,9 @@
                 <a href="<?= base_url('customer/obat') ?>" class="btn btn-default">
                     Lanjut Belanja
                 </a>
-                <a href="<?= base_url('customer/checkout') ?>" 
-                   class="btn btn-success"
-                   onclick="return confirm('Yakin ingin checkout?')">
-                    Checkout Sekarang
+                <a href="#" class="btn btn-success"
+                onclick="konfirmasiCheckout()">
+                Checkout Sekarang
                 </a>
             </div>
 
@@ -79,5 +77,41 @@
     </div>
 
 </div>
+
+<script>
+function konfirmasiHapus(url) {
+    Swal.fire({
+        title: 'Hapus Item?',
+        text: 'Item akan dihapus dari keranjang!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+
+function konfirmasiCheckout() {
+    Swal.fire({
+        title: 'Konfirmasi Checkout',
+        text: 'Yakin ingin melakukan checkout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Ya, Checkout!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '<?= base_url('customer/checkout') ?>';
+        }
+    });
+}
+</script>
 
 <?= $this->include('Backend/Template/footer') ?>

@@ -20,7 +20,32 @@
 		$(window).on('resize', function () {
 		  if ($(window).width() <= 767) $('#sidebar-collapse').collapse('hide')
 		})
-	</script>	
+	</script>
+	
+		<!-- SweetAlert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<script>
+	// Flash message success
+	<?php if(session()->getFlashdata('success')): ?>
+	Swal.fire({
+		icon: 'success',
+		title: 'Berhasil!',
+		text: '<?= session()->getFlashdata('success') ?>',
+		confirmButtonColor: '#28a745'
+	});
+	<?php endif; ?>
+
+	// Flash message error
+	<?php if(session()->getFlashdata('msg')): ?>
+	Swal.fire({
+		icon: 'error',
+		title: 'Oops!',
+		text: '<?= session()->getFlashdata('msg') ?>',
+		confirmButtonColor: '#d33'
+	});
+	<?php endif; ?>
+	</script>
 </body>
 
 </html>

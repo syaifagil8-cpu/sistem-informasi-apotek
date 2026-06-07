@@ -95,7 +95,50 @@ class Customer extends BaseController
         if (!session()->get('logged_in')) {
             return redirect()->to('/customer/login');
         }
-        return view('Backend/Login/dashboard_customer');
+
+        $penjualanModel = new \App\Models\PenjualanModel();
+        $detailModel    = new \App\Models\DetailPenjualanModel();
+        $id             = session()->get('id');
+
+        // Pesanan aktif (Belum Lunas)
+        $pesananAktif = $penjualanModel
+                        ->where('id_customer', $id)
+                        ->where('status', 'Belum Lunas')
+                        ->countAllResults();
+
+        // Total semua transaksi
+        $totalTransaksi = $penjualanModel
+                          ->where('id_customer', $id)
+                          ->countAllResults();
+
+        // Total item dibeli
+        $semuaTransaksi = $penjualanModel
+                          ->where('id_customer', $id)
+                          ->findAll();
+
+        $totalItem = 0;
+        foreach ($semuaTransaksi as $t) {
+            $details = $detailModel->where('id_penjualan', $t['id_penjualan'])->findAll();
+            foreach ($details as $d) {
+                $totalItem += $d['qty'];
+            }
+        }
+
+        // Transaksi terbaru
+        $transaksiTerbaru = $penjualanModel
+                            ->where('id_customer', $id)
+                            ->orderBy('tanggal', 'DESC')
+                            ->limit(3)
+                            ->findAll();
+
+        $data = [
+            'pesananAktif'    => $pesananAktif,
+            'totalTransaksi'  => $totalTransaksi,
+            'totalItem'       => $totalItem,
+            'transaksiTerbaru'=> $transaksiTerbaru
+        ];
+
+        return view('Backend/Login/dashboard_customer', $data);
     }
 
     // =====================
@@ -323,7 +366,7 @@ class Customer extends BaseController
         session()->setFlashdata('success', 'Pembayaran berhasil! Transaksi sudah lunas.');
         return redirect()->to('/customer/transaksi');
     }
-    
+
     // =====================
     // LOGOUT
     // =====================
