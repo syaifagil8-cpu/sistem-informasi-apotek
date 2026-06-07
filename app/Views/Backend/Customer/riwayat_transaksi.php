@@ -43,9 +43,16 @@
                         </td>
                         <td>
                             <a href="<?= base_url('customer/detail-transaksi/'.$t['id_penjualan']) ?>"
-                               class="btn btn-info btn-sm">
-                               Detail
+                            class="btn btn-info btn-sm">
+                            Detail
                             </a>
+                            <?php if($t['status'] == 'Belum Lunas'): ?>
+                            <a href="<?= base_url('customer/bayar/'.$t['id_penjualan']) ?>"
+                            class="btn btn-success btn-sm"
+                            onclick="return confirm('Yakin ingin melakukan pembayaran?')">
+                            Bayar
+                            </a>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>

@@ -29,3 +29,4 @@ $routes->get('customer/transaksi', 'Customer::transaksi');
 $routes->get('customer/detail-transaksi/(:any)', 'Customer::detail_transaksi/$1');
 $routes->get('customer/profil', 'Customer::profil');
 $routes->post('customer/update_profil', 'Customer::update_profil');
+$routes->get('customer/bayar/(:any)', 'Customer::bayar/$1');

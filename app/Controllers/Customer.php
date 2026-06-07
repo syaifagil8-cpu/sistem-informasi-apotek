@@ -251,7 +251,7 @@ class Customer extends BaseController
 
         return view('Backend/Customer/detail_transaksi', $data);
     }
-    
+
     // =====================
     // PROFIL
     // =====================
@@ -298,7 +298,32 @@ class Customer extends BaseController
         session()->setFlashdata('success', 'Profil berhasil diupdate!');
         return redirect()->to('/customer/profil');
     }
+    
+    // =====================
+    // PEMBAYARAN
+    // =====================
+    public function bayar($id)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
 
+        $penjualanModel = new \App\Models\PenjualanModel();
+        $transaksi = $penjualanModel->find($id);
+
+        // Pastikan transaksi milik customer yang login
+        if (!$transaksi || $transaksi['id_customer'] != session()->get('id')) {
+            session()->setFlashdata('msg', 'Transaksi tidak ditemukan!');
+            return redirect()->to('/customer/transaksi');
+        }
+
+        // Update status jadi Lunas
+        $penjualanModel->update($id, ['status' => 'Lunas']);
+
+        session()->setFlashdata('success', 'Pembayaran berhasil! Transaksi sudah lunas.');
+        return redirect()->to('/customer/transaksi');
+    }
+    
     // =====================
     // LOGOUT
     // =====================
