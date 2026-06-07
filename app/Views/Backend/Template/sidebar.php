@@ -42,6 +42,7 @@
             <!-- MENU KHUSUS CUSTOMER (Default) -->
             <li class="active"><a href="<?= base_url('customer/dashboard'); ?>"><span class="glyphicon glyphicon-dashboard"></span> Dashboard</a></li>
             <li><a href="<?= base_url('customer/obat'); ?>"><span class="glyphicon glyphicon-plus"></span> Cari Obat</a></li>
+            <li><a href="<?= base_url('customer/keranjang'); ?>"><span class="glyphicon glyphicon-shopping-cart"></span> Keranjang</a></li>
             <li><a href="<?= base_url('customer/transaksi'); ?>"><span class="glyphicon glyphicon-shopping-cart"></span> Riwayat Transaksi</a></li>
             <li><a href="<?= base_url('customer/profil'); ?>"><span class="glyphicon glyphicon-user"></span> Profil Saya</a></li>
         <?php endif; ?>

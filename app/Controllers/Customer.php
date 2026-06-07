@@ -99,6 +99,207 @@ class Customer extends BaseController
     }
 
     // =====================
+    // KERANJANG
+    // =====================
+    public function keranjang()
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $cart = session()->get('cart') ?? [];
+        $data = ['cart' => $cart];
+        return view('Backend/Customer/keranjang', $data);
+    }
+
+    public function tambah_keranjang($id)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $model = new \App\Models\ObatModel();
+        $obat = $model->getDetail($id);
+
+        if (!$obat) {
+            session()->setFlashdata('msg', 'Obat tidak ditemukan!');
+            return redirect()->to('/customer/obat');
+        }
+
+        $cart = session()->get('cart') ?? [];
+
+        if (isset($cart[$id])) {
+            $cart[$id]['qty'] += 1;
+            $cart[$id]['subtotal'] = $cart[$id]['qty'] * $obat['harga_jual'];
+        } else {
+            $cart[$id] = [
+                'id_obat'   => $obat['id_obat'],
+                'nama_obat' => $obat['nama_obat'],
+                'harga'     => $obat['harga_jual'],
+                'qty'       => 1,
+                'subtotal'  => $obat['harga_jual']
+            ];
+        }
+
+        session()->set('cart', $cart);
+        session()->setFlashdata('success', 'Obat berhasil ditambahkan ke keranjang!');
+        return redirect()->to('/customer/obat');
+    }
+
+    public function hapus_keranjang($id)
+    {
+        $cart = session()->get('cart') ?? [];
+        unset($cart[$id]);
+        session()->set('cart', $cart);
+        return redirect()->to('/customer/keranjang');
+    }
+
+    public function checkout()
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $cart = session()->get('cart') ?? [];
+
+        if (empty($cart)) {
+            session()->setFlashdata('msg', 'Keranjang masih kosong!');
+            return redirect()->to('/customer/keranjang');
+        }
+
+        $penjualanModel      = new \App\Models\PenjualanModel();
+        $detailModel         = new \App\Models\DetailPenjualanModel();
+        $obatModel           = new \App\Models\ObatModel();
+
+        // Generate ID penjualan
+        $lastNumber = $penjualanModel->getLastId();
+        $newId      = 'PJL' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+
+        // Hitung total
+        $total = array_sum(array_column($cart, 'subtotal'));
+
+        // Simpan ke tbl_penjualan
+        $penjualanModel->insert([
+            'id_penjualan' => $newId,
+            'id_customer'  => session()->get('id'),
+            'id_admin'     => 'ADM01',
+            'tanggal'      => date('Y-m-d'),
+            'total'        => $total,
+            'status'       => 'Belum Lunas'
+        ]);
+
+        // Simpan detail & kurangi stok
+        $i = 1;
+        foreach ($cart as $item) {
+            $idDetail = 'DTL' . str_pad($i, 3, '0', STR_PAD_LEFT);
+            $detailModel->insert([
+                'id_detail_penjualan' => $idDetail . substr($newId, 3),
+                'id_penjualan'        => $newId,
+                'id_obat'             => $item['id_obat'],
+                'qty'                 => $item['qty'],
+                'subtotal'            => $item['subtotal']
+            ]);
+
+            // Kurangi stok
+            $obat = $obatModel->find($item['id_obat']);
+            $obatModel->update($item['id_obat'], [
+                'stok' => $obat['stok'] - $item['qty']
+            ]);
+
+            $i++;
+        }
+
+        // Kosongkan keranjang
+        session()->remove('cart');
+        session()->setFlashdata('success', 'Checkout berhasil! Pesanan sedang diproses.');
+        return redirect()->to('/customer/transaksi');
+    }
+
+    // =====================
+    // RIWAYAT TRANSAKSI
+    // =====================
+    public function transaksi()
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $penjualanModel = new \App\Models\PenjualanModel();
+        $data = [
+            'transaksi' => $penjualanModel
+                            ->where('id_customer', session()->get('id'))
+                            ->orderBy('tanggal', 'DESC')
+                            ->findAll()
+        ];
+
+        return view('Backend/Customer/riwayat_transaksi', $data);
+    }
+
+    public function detail_transaksi($id)
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $detailModel = new \App\Models\DetailPenjualanModel();
+        $penjualanModel = new \App\Models\PenjualanModel();
+
+        $data = [
+            'transaksi' => $penjualanModel->find($id),
+            'detail'    => $detailModel->getByPenjualan($id)
+        ];
+
+        return view('Backend/Customer/detail_transaksi', $data);
+    }
+    
+    // =====================
+    // PROFIL
+    // =====================
+    public function profil()
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $model = new UserModel();
+        $data = [
+            'customer' => $model->find(session()->get('id'))
+        ];
+
+        return view('Backend/Customer/profil', $data);
+    }
+
+    public function update_profil()
+    {
+        if (!session()->get('logged_in')) {
+            return redirect()->to('/customer/login');
+        }
+
+        $model = new UserModel();
+        $id = session()->get('id');
+
+        $data = [
+            'nama_customer' => $this->request->getVar('nama_customer'),
+            'alamat'        => $this->request->getVar('alamat'),
+            'telepon'       => $this->request->getVar('telepon'),
+            'email'         => $this->request->getVar('email'),
+        ];
+
+        // Kalau isi password baru
+        $password_baru = $this->request->getVar('password');
+        if (!empty($password_baru)) {
+            $data['password'] = password_hash($password_baru, PASSWORD_DEFAULT);
+        }
+
+        $model->update($id, $data);
+
+        // Update session nama
+        session()->set('username', $data['nama_customer']);
+        session()->setFlashdata('success', 'Profil berhasil diupdate!');
+        return redirect()->to('/customer/profil');
+    }
+
+    // =====================
     // LOGOUT
     // =====================
     public function logout()
